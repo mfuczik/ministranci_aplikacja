@@ -100,7 +100,7 @@ nav.tabbar button.active{color:var(--primary)}
 
 <script>
 // ═════════════════════════ KONFIGURACJA ═════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbzDqD7nhtXZ5qbLAmXnv9nmgGBcwQcdA8v6B88OfLQwYqryXeZOg_fwknwZSePBLA5v/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwYl5TLwLHcrDUIjm35UBRUiUu0FwYK8PlEBHpssJ_xp1tVgNH0HUIkLu0I678TAUwG/exec';
 
 // Kolejność wyświetlania dni (Poniedziałek→Niedziela); wartości to JS getDay() (0=Nd..6=Sob)
 const DAYS = ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
@@ -122,6 +122,7 @@ const S = {
   newMsza: {dzien:1, godzina:'07:00', pktObecny:2, pktNieobecny:0, pktDodatkowy:1},
   newGrafikMszaId:'', newGrafikMinId:'',
   newWyd: {nazwa:'', dataOd:'', dataDo:'', pktDodatkowy:1},
+  punktySort: {key:'punkty', dir:'desc'},
 };
 
 // ═════════════════════════ DATY ═════════════════════════
@@ -366,7 +367,7 @@ function renderDzis(){
   const wydCards=wydDnia.map(wyd=>{
     const dodKey=dodKlucz(dateStr,'wydarzenie',wyd.id);
     const dods=S.dodatkowi[dodKey]||[];
-    const ik=`wyd_${wyd.id}_${dateStr}`;
+    const ik=`wydarzenie_${wyd.id}_${dateStr}`;
     const dodOptions=S.ministranci.filter(m=>!dods.find(d=>String(d.ministrantId)===String(m.id)));
     const dodItems=dods.map(d=>`
       <div class="dod-row">
@@ -400,8 +401,22 @@ function renderDzis(){
 }
 
 // ═════════════════════════ RENDER: PUNKTY ═════════════════════════
+function setPunktySort(key){
+  if(S.punktySort.key===key)S.punktySort.dir=S.punktySort.dir==='asc'?'desc':'asc';
+  else{S.punktySort.key=key;S.punktySort.dir=(key==='punkty')?'desc':'asc';}
+  render();
+}
+function sortArrow(key){return S.punktySort.key===key?(S.punktySort.dir==='asc'?' ▲':' ▼'):''}
 function renderPunkty(){
-  const rows=[...S.ministranci].sort((a,b)=>(S.punkty[b.id]||0)-(S.punkty[a.id]||0)).map(m=>`
+  const {key,dir}=S.punktySort;
+  const rows=[...S.ministranci].sort((a,b)=>{
+    let va,vb;
+    if(key==='punkty'){va=S.punkty[a.id]||0;vb=S.punkty[b.id]||0;}
+    else if(key==='stopien'){va=STOPNIE.indexOf(a.stopien);vb=STOPNIE.indexOf(b.stopien);}
+    else{va=(a[key]||'').toLowerCase();vb=(b[key]||'').toLowerCase();}
+    const cmp=va<vb?-1:va>vb?1:0;
+    return dir==='asc'?cmp:-cmp;
+  }).map(m=>`
     <tr><td>${m.imie}</td><td>${m.nazwisko}</td>
       <td><span class="pts-badge ${STOPIEN_KOLOR[m.stopien]||''}">${m.stopien}</span></td>
       <td style="text-align:right;font-weight:700">${S.punkty[m.id]||0}</td>
@@ -409,7 +424,12 @@ function renderPunkty(){
   return `<div class="card">
     <h2><i class="ti ti-star"></i>Punkty</h2>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Imię</th><th>Nazwisko</th><th>Stopień</th><th style="text-align:right">Punkty</th></tr></thead>
+      <thead><tr>
+        <th style="cursor:pointer" onclick="setPunktySort('imie')">Imię${sortArrow('imie')}</th>
+        <th style="cursor:pointer" onclick="setPunktySort('nazwisko')">Nazwisko${sortArrow('nazwisko')}</th>
+        <th style="cursor:pointer" onclick="setPunktySort('stopien')">Stopień${sortArrow('stopien')}</th>
+        <th style="cursor:pointer;text-align:right" onclick="setPunktySort('punkty')">Punkty${sortArrow('punkty')}</th>
+      </tr></thead>
       <tbody>${rows||'<tr><td colspan="4" class="empty">Brak ministrantów</td></tr>'}</tbody>
     </table></div>
   </div>`;
