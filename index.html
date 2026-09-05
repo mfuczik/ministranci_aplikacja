@@ -101,14 +101,14 @@ nav.tabbar button.active{color:var(--primary)}
   <button data-tab="historia" onclick="setTab('historia')"><i class="ti ti-history"></i>Historia</button>
   <button data-tab="panel" onclick="setTab('panel')"><i class="ti ti-settings"></i>Panel opiekuna</button>
 </nav>
-
+ 
 <script>
 // ═════════════════════════ KONFIGURACJA ═════════════════════════
 const DAYS = ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
 const DISPLAY_ORDER = [1,2,3,4,5,6,0]; // Pon..Nd
 const STOPNIE = ['Kandydat','Ministrant','Lektor','Animator'];
 const STOPIEN_KOLOR = {Kandydat:'pb-blue',Ministrant:'',Lektor:'pb-green',Animator:'pb-red'};
-
+ 
 // ═════════════════════════ INDEXEDDB — LOKALNA BAZA DANYCH ═════════════════════════
 const DB_NAME='ministranciDB', DB_VERSION=1;
 let _dbPromise=null;
@@ -178,7 +178,7 @@ function nextId(list){
   const ids=list.map(x=>Number(x.id)).filter(n=>!isNaN(n)&&n>0);
   return ids.length?Math.max(...ids)+1:1;
 }
-
+ 
 // ═════════════════════════ STAN ═════════════════════════
 const S = {
   tab: 'dzis',
@@ -194,14 +194,14 @@ const S = {
   newWyd: {nazwa:'', dataOd:'', dataDo:'', pktDodatkowy:1},
   punktySort: {key:'punkty', dir:'desc'},
 };
-
+ 
 // ═════════════════════════ DATY ═════════════════════════
 function pad(n){return String(n).padStart(2,'0')}
 function todayStr(){const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function addDaysStr(str,delta){const d=new Date(str+'T00:00:00');d.setDate(d.getDate()+delta);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function dowOf(str){return new Date(str+'T00:00:00').getDay()}
 function fmtPL(str){const [y,m,d]=str.split('-');return `${d}.${m}.${y}`}
-
+ 
 // ═════════════════════════ POMOCNICZE UI ═════════════════════════
 function setSyncStatus(s){const el=document.getElementById('syncDot');el.className='sync-dot'+(s==='err'?' err':'')}
 function toast(msg,type='ok',ms=2600){
@@ -225,7 +225,7 @@ function recomputePunkty(){
     S.punkty[w.ministrantId]=(S.punkty[w.ministrantId]||0)+(Number(w.punkty)||0);
   });
 }
-
+ 
 // ═════════════════════════ ZASIEW DOMYŚLNYCH WPISÓW (ostatnie 7 dni) ═════════════════════════
 async function ensureLedgerUpToDate(){
   const existingKeys=new Set(S.wpisyPunktowe.map(w=>w.klucz));
@@ -245,7 +245,7 @@ async function ensureLedgerUpToDate(){
     }
   }
 }
-
+ 
 // ═════════════════════════ INIT ═════════════════════════
 async function init(){
   try{
@@ -271,7 +271,7 @@ async function init(){
   }
 }
 function setTab(t){S.tab=t;render();}
-
+ 
 // ═════════════════════════ AKCJE: OBECNOŚĆ ═════════════════════════
 async function toggleObecnosc(dateStr,mszaId,minId){
   const msza=fMsza(mszaId);if(!msza)return;
@@ -286,9 +286,9 @@ async function toggleObecnosc(dateStr,mszaId,minId){
   try{await dbPut('wpisyPunktowe',w);setSyncStatus('ok');}
   catch(e){setSyncStatus('err');toast('Błąd zapisu lokalnego!','err',4000);}
 }
-
+ 
 function dodKlucz(dateStr,zrodloTyp,zrodloId){return `${dateStr}_${zrodloTyp}${zrodloId}`}
-
+ 
 async function addDodatkowy(dateStr,zrodloTyp,zrodloId){
   const ik=`${zrodloTyp}_${zrodloId}_${dateStr}`;
   const val=(S.extraInputs[ik]||'').trim();if(!val)return;
@@ -299,7 +299,7 @@ async function addDodatkowy(dateStr,zrodloTyp,zrodloId){
   if(S.dodatkowi[key].find(d=>String(d.ministrantId)===String(min.id))){toast('Już jest na liście','err');return;}
   S.dodatkowi[key].push({ministrantId:min.id,name:min.imie+' '+min.nazwisko});
   S.extraInputs[ik]='';
-
+ 
   let pktDodatkowy=1,zrodlo;
   if(zrodloTyp==='msza'){zrodlo=fMsza(zrodloId);pktDodatkowy=zrodlo?Number(zrodlo.pktDodatkowy)||1:1;}
   else{zrodlo=fWyd(zrodloId);pktDodatkowy=zrodlo?Number(zrodlo.pktDodatkowy)||1:1;}
@@ -315,7 +315,7 @@ async function addDodatkowy(dateStr,zrodloTyp,zrodloId){
     setSyncStatus('ok');
   }catch(e){setSyncStatus('err');toast('Błąd zapisu lokalnego!','err',4000);}
 }
-
+ 
 async function removeDodatkowy(dateStr,zrodloTyp,zrodloId,minId){
   const key=dodKlucz(dateStr,zrodloTyp,zrodloId);
   S.dodatkowi[key]=(S.dodatkowi[key]||[]).filter(d=>String(d.ministrantId)!==String(minId));
@@ -330,7 +330,7 @@ async function removeDodatkowy(dateStr,zrodloTyp,zrodloId,minId){
     setSyncStatus('ok');
   }catch(e){setSyncStatus('err');toast('Błąd zapisu lokalnego!','err',4000);}
 }
-
+ 
 // ═════════════════════════ AKCJE: PIN ═════════════════════════
 async function checkPin(){
   if(!S.pinSet){
@@ -343,7 +343,7 @@ async function checkPin(){
   if(row&&String(row.wartosc)===String(S.pinInput.trim())){S.pinUnlocked=true;S.pinInput='';render();}
   else{toast('Błędny PIN','err');S.pinInput='';render();}
 }
-
+ 
 // ═════════════════════════ AKCJE: PANEL OPIEKUNA — CRUD ═════════════════════════
 async function addMin(){
   const {imie,nazwisko,stopien}=S.newMin;
@@ -372,7 +372,7 @@ async function deleteMin(id){
   S.grafik=S.grafik.filter(g=>g.ministrantId!=id);
   toast('Usunięto');render();
 }
-
+ 
 async function addMsza(){
   const mm=S.newMsza;if(!mm.godzina)return;
   const id=nextId(S.msze);
@@ -388,7 +388,7 @@ async function deleteMsza(id){
   S.grafik=S.grafik.filter(g=>g.mszaId!=id);
   toast('Usunięto');render();
 }
-
+ 
 async function addGrafik(){
   const mszaId=S.newGrafikMszaId,ministrantId=S.newGrafikMinId;
   if(!mszaId||!ministrantId)return;
@@ -404,7 +404,7 @@ async function deleteGrafik(mszaId,ministrantId){
   S.grafik=S.grafik.filter(x=>!(x.mszaId==mszaId&&x.ministrantId==ministrantId));
   toast('Usunięto');render();
 }
-
+ 
 async function addWydarzenie(){
   const w=S.newWyd;if(!w.nazwa.trim()||!w.dataOd)return;
   const id=nextId(S.wydarzenia);
@@ -419,7 +419,7 @@ async function deleteWydarzenie(id){
   S.wydarzenia=S.wydarzenia.filter(w=>w.id!=id);
   toast('Usunięto');render();
 }
-
+ 
 // ═════════════════════════ KOPIA ZAPASOWA ═════════════════════════
 async function exportBackup(){
   const data={
@@ -440,6 +440,21 @@ async function exportBackup(){
   URL.revokeObjectURL(url);
   toast('Kopia zapasowa pobrana');
 }
+function exportPunktyCSV(){
+  const rows=[...S.ministranci].sort((a,b)=>(S.punkty[b.id]||0)-(S.punkty[a.id]||0));
+  let csv='Imię;Nazwisko;Stopień;Punkty\n';
+  rows.forEach(m=>{
+    csv+=`${m.imie};${m.nazwisko};${m.stopien};${S.punkty[m.id]||0}\n`;
+  });
+  // BOM na początku, żeby polskie znaki (ą,ę,ł...) wyświetlały się poprawnie w Excelu
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`punkty-${todayStr()}.csv`;
+  document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
+  toast('Plik z punktami pobrany');
+}
 async function importBackupFile(input){
   const file=input.files&&input.files[0];if(!file)return;
   if(!confirm('To NADPISZE wszystkie obecne dane danymi z pliku kopii zapasowej. Kontynuować?')){input.value='';return;}
@@ -457,7 +472,7 @@ async function importBackupFile(input){
   }
   input.value='';
 }
-
+ 
 // ═════════════════════════ RENDER: DZISIEJSZE MSZE ═════════════════════════
 function renderDzis(){
   const dateStr=S.viewDate,dow=dowOf(dateStr);
@@ -466,9 +481,9 @@ function renderDzis(){
   const canPrev=dateStr>addDaysStr(today,-6);
   const mszeD=S.msze.filter(m=>m.dzien===dow).sort((a,b)=>a.godzina.localeCompare(b.godzina));
   const wydDnia=S.wydarzenia.filter(w=>w.dataOd<=dateStr&&w.dataDo>=dateStr);
-
+ 
   const dayLabel=dateStr===today?`Dziś, ${DAYS[dow]} ${fmtPL(dateStr)}`:`${DAYS[dow]} ${fmtPL(dateStr)}`;
-
+ 
   const mszCards=mszeD.map(msza=>{
     const gDnia=grafikMszy(msza.id);
     const oblMins=gDnia.map(g=>fMin(g.ministrantId)).filter(Boolean);
@@ -477,7 +492,7 @@ function renderDzis(){
     const ik=`msza_${msza.id}_${dateStr}`;
     const oblIds=gDnia.map(g=>String(g.ministrantId));
     const dodOptions=S.ministranci.filter(m=>!oblIds.includes(String(m.id))&&!dods.find(d=>String(d.ministrantId)===String(m.id)));
-
+ 
     const rows=oblMins.length?oblMins.map(m=>{
       const klucz=`${dateStr}_msza${msza.id}_${m.id}`;
       const w=wpisFind(klucz);
@@ -492,14 +507,14 @@ function renderDzis(){
         </button>
       </div>`;
     }).join(''):`<div class="empty">Brak przypisanych osób do tej mszy</div>`;
-
+ 
     const dodItems=dods.map(d=>`
       <div class="dod-row">
         <i class="ti ti-check" style="color:var(--green);flex-shrink:0"></i>
         <span style="flex:1;font-size:13px">${d.name}</span>
         <button class="x-btn" onclick="removeDodatkowy('${dateStr}','msza',${msza.id},${d.ministrantId})">×</button>
       </div>`).join('');
-
+ 
     return `<div class="card">
       <h2><i class="ti ti-building-church"></i>${msza.godzina}</h2>
       <p class="muted" style="margin-bottom:8px">Msza obowiązkowa</p>
@@ -513,7 +528,7 @@ function renderDzis(){
       ${dodItems}
     </div>`;
   }).join('');
-
+ 
   const wydCards=wydDnia.map(wyd=>{
     const dodKey=dodKlucz(dateStr,'wydarzenie',wyd.id);
     const dods=S.dodatkowi[dodKey]||[];
@@ -537,7 +552,7 @@ function renderDzis(){
       </div>
     </div>`;
   }).join('');
-
+ 
   return `
     <div class="date-nav">
       <button ${!canPrev?'disabled':''} onclick="S.viewDate=addDaysStr(S.viewDate,-1);render()"><i class="ti ti-chevron-left"></i></button>
@@ -549,7 +564,7 @@ function renderDzis(){
     ${wydCards}
   `;
 }
-
+ 
 // ═════════════════════════ RENDER: PUNKTY ═════════════════════════
 function setPunktySort(key){
   if(S.punktySort.key===key)S.punktySort.dir=S.punktySort.dir==='asc'?'desc':'asc';
@@ -584,7 +599,7 @@ function renderPunkty(){
     </table></div>
   </div>`;
 }
-
+ 
 // ═════════════════════════ RENDER: HISTORIA ═════════════════════════
 function zrodloLabel(w){
   if(w.zrodloTyp==='msza'){
@@ -617,7 +632,7 @@ function renderHistoria(){
     ${blocks||'<div class="empty">Brak jeszcze żadnych wpisów</div>'}
   </div>`;
 }
-
+ 
 // ═════════════════════════ RENDER: PANEL OPIEKUNA ═════════════════════════
 function renderPanel(){
   if(!S.pinUnlocked){
@@ -630,7 +645,7 @@ function renderPanel(){
       <button class="btn btn-primary" onclick="checkPin()">${S.pinSet?'Odblokuj':'Ustaw PIN'}</button>
     </div>`;
   }
-
+ 
   // ── Ministranci ──
   const minRows=S.ministranci.map(m=>{
     if(S.editMinId===m.id){
@@ -650,7 +665,7 @@ function renderPanel(){
         <button class="btn btn-danger" style="padding:5px 9px" onclick="deleteMin(${m.id})"><i class="ti ti-trash"></i></button>
       </td></tr>`;
   }).join('');
-
+ 
   // ── Msze ──
   const mszaRows=[...S.msze].sort((a,b)=>a.dzien-b.dzien||a.godzina.localeCompare(b.godzina)).map(m=>`
     <tr><td>${DAYS[m.dzien]}</td><td>${m.godzina}</td>
@@ -660,7 +675,7 @@ function renderPanel(){
       <td><button class="btn btn-danger" style="padding:5px 9px" onclick="deleteMsza(${m.id})"><i class="ti ti-trash"></i></button></td>
     </tr>`).join('');
   const dayOpts=DISPLAY_ORDER.map(i=>`<option value="${i}" ${S.newMsza.dzien===i?'selected':''}>${DAYS[i]}</option>`).join('');
-
+ 
   // ── Grafik ──
   const mszaOptsGraf=[...S.msze].sort((a,b)=>a.dzien-b.dzien||a.godzina.localeCompare(b.godzina))
     .map(m=>`<option value="${m.id}" ${S.newGrafikMszaId==m.id?'selected':''}>${mszaLabel(m)}</option>`).join('');
@@ -673,7 +688,7 @@ function renderPanel(){
     return `<tr><td>${ms?mszaLabel(ms):'?'}</td><td>${m?m.imie+' '+m.nazwisko:'?'}</td>
       <td><button class="btn btn-danger" style="padding:5px 9px" onclick="deleteGrafik(${g.mszaId},${g.ministrantId})"><i class="ti ti-trash"></i></button></td></tr>`;
   }).join('');
-
+ 
   // ── Podgląd tygodniowy ──
   const weekByDay=DISPLAY_ORDER.map(dow=>{
     const mszeD=S.msze.filter(m=>m.dzien===dow).sort((a,b)=>a.godzina.localeCompare(b.godzina));
@@ -684,14 +699,14 @@ function renderPanel(){
     }).join('');
     return `<div class="week-day-block"><h4>${DAYS[dow]}</h4>${lines}</div>`;
   }).join('');
-
+ 
   const weekByPerson=S.ministranci.map(m=>{
     const jego=S.grafik.filter(g=>String(g.ministrantId)===String(m.id))
       .map(g=>fMsza(g.mszaId)).filter(Boolean).sort((a,b)=>a.dzien-b.dzien||a.godzina.localeCompare(b.godzina));
     return `<tr><td>${m.imie} ${m.nazwisko}</td><td style="text-align:center">${jego.length}</td>
       <td style="font-size:12.5px;color:var(--text2)">${jego.map(mszaLabel).join(', ')||'—'}</td></tr>`;
   }).join('');
-
+ 
   // ── Wydarzenia ──
   const wydRows=[...S.wydarzenia].sort((a,b)=>a.dataOd.localeCompare(b.dataOd)).map(w=>`
     <tr><td>${w.nazwa}</td>
@@ -699,7 +714,7 @@ function renderPanel(){
       <td><span class="pts-badge pb-blue">${pktStr(w.pktDodatkowy)}</span></td>
       <td><button class="btn btn-danger" style="padding:5px 9px" onclick="deleteWydarzenie(${w.id})"><i class="ti ti-trash"></i></button></td>
     </tr>`).join('');
-
+ 
   return `
   <div class="card">
     <h2><i class="ti ti-users"></i>Ministranci</h2>
@@ -714,7 +729,7 @@ function renderPanel(){
       <tbody>${minRows||'<tr><td colspan="4" class="empty">Brak</td></tr>'}</tbody>
     </table></div>
   </div>
-
+ 
   <div class="card">
     <h2><i class="ti ti-building-church"></i>Msze święte</h2>
     <div class="form-row">
@@ -730,7 +745,7 @@ function renderPanel(){
       <tbody>${mszaRows||'<tr><td colspan="6" class="empty">Brak</td></tr>'}</tbody>
     </table></div>
   </div>
-
+ 
   <div class="card">
     <h2><i class="ti ti-calendar-week"></i>Grafik — zapisy na msze</h2>
     <p class="muted">Wybierz mszę, potem osobę.</p>
@@ -744,7 +759,7 @@ function renderPanel(){
       <tbody>${grafRows||'<tr><td colspan="3" class="empty">Brak</td></tr>'}</tbody>
     </table></div>
   </div>
-
+ 
   <div class="card">
     <h2><i class="ti ti-layout-grid"></i>Podgląd tygodnia</h2>
     <div class="section-title">Msze i przypisane osoby</div>
@@ -755,7 +770,7 @@ function renderPanel(){
       <tbody>${weekByPerson||'<tr><td colspan="3" class="empty">Brak</td></tr>'}</tbody>
     </table></div>
   </div>
-
+ 
   <div class="card">
     <h2><i class="ti ti-sparkles"></i>Wydarzenia dodatkowe</h2>
     <p class="muted">Jednodniowe (np. zbiórka) lub na zakres dat (np. majówka) — punkty liczą się każdego dnia z osobna.</p>
@@ -771,7 +786,7 @@ function renderPanel(){
       <tbody>${wydRows||'<tr><td colspan="4" class="empty">Brak</td></tr>'}</tbody>
     </table></div>
   </div>
-
+ 
   <div class="card">
     <h2><i class="ti ti-database-export"></i>Kopia zapasowa</h2>
     <p class="muted">Dane są tylko na tym urządzeniu/w tej przeglądarce. Rób regularnie kopię zapasową (plik .json), żeby nic nie stracić w razie awarii/wyczyszczenia przeglądarki.</p>
@@ -782,9 +797,13 @@ function renderPanel(){
         <input type="file" accept="application/json" style="display:none" onchange="importBackupFile(this)">
       </label>
     </div>
+    <p class="muted" style="margin-top:14px">Sama tabela punktów do Excela (imię, nazwisko, stopień, punkty):</p>
+    <div class="form-row">
+      <button class="btn btn-outline" onclick="exportPunktyCSV()"><i class="ti ti-table"></i> Eksportuj punkty (CSV)</button>
+    </div>
   </div>`;
 }
-
+ 
 // ═════════════════════════ GŁÓWNY RENDER ═════════════════════════
 function render(){
   document.querySelectorAll('nav.tabbar button').forEach(b=>b.classList.toggle('active',b.dataset.tab===S.tab));
@@ -795,14 +814,14 @@ function render(){
   else if(S.tab==='historia')app.innerHTML=renderHistoria();
   else if(S.tab==='panel')app.innerHTML=renderPanel();
 }
-
+ 
 // ═════════════════════════ SERVICE WORKER (PWA / OFFLINE) ═════════════════════════
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW nie zarejestrowany:',e));
   });
 }
-
+ 
 init();
 </script>
 </body>
